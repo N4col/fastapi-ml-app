@@ -1,8 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, ValidationError
 from typing import Any
-from model import model  # Importujemy model z osobnego pliku
+from model import model  
 import numpy as np
+import os
 
 app = FastAPI()
 
@@ -43,6 +44,18 @@ def predict(data: PredictRequest) -> dict[str, Any]:
         raise HTTPException(status_code=500, detail=f"Nieoczekiwany błąd: {str(e)}")
 
 
+
+@app.get("/config")
+def read_config():
+    config_value = os.getenv("MY_CONFIG_VALUE", "Brak wartości")
+    return {"config": config_value}
+
+
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
+    import os
+
+    port = int(os.environ.get("PORT", 8080))  # Zmienna środowiskowa z Google Cloud Run
+    uvicorn.run("app:app", host="0.0.0.0", port=port, reload=True)
+
